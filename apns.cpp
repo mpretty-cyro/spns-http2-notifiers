@@ -120,20 +120,22 @@ int run(int argc, char* argv[]) {
                     "Unparseable JSON notification request data");
             return;
         }
-        if (token.size() < 2 * TOKEN_MIN_BYTES || token.size() > 2 * TOKEN_MAX_BYTES ||
-            !oxenc::is_hex(token)) {
+        if (token.size() < oxenc::to_hex_size(TOKEN_MIN_BYTES) ||
+            token.size() > oxenc::to_hex_size(TOKEN_MAX_BYTES) || !oxenc::is_hex(token)) {
             log::warning(
                     cat,
                     "notifier.validate called with invalid notification token: expected {}-{} hex "
                     "digits, got {} (length {})",
-                    2 * TOKEN_MIN_BYTES,
-                    2 * TOKEN_MAX_BYTES,
+                    oxenc::to_hex_size(TOKEN_MIN_BYTES),
+                    oxenc::to_hex_size(TOKEN_MAX_BYTES),
                     token,
                     token.size());
             m.send_reply(
                     "{}"_format(static_cast<int>(SUBSCRIBE::BAD_INPUT)),
                     "Invalid APNs device token (expected {}-{} hex, got {}B)"_format(
-                            2 * TOKEN_MIN_BYTES, 2 * TOKEN_MAX_BYTES, token.size()));
+                            oxenc::to_hex_size(TOKEN_MIN_BYTES),
+                            oxenc::to_hex_size(TOKEN_MAX_BYTES),
+                            token.size()));
             return;
         }
         log::debug(cat, "notifier.validate validated token {}", token);
